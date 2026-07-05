@@ -28,7 +28,7 @@ class ActionRecorder:
 def make_context(**config):
     return SimpleNamespace(
         config=config,
-        logger=logging.getLogger("test.auth_code"),
+        logger=logging.getLogger("test.auth-code"),
         actions=ActionRecorder(),
     )
 
@@ -38,7 +38,7 @@ def test_plugin_entrypoint_manifest() -> None:
 
     assert isinstance(loaded, SetupPlugin)
     assert loaded.manifest is MANIFEST
-    assert loaded.manifest.id == "auth_code"
+    assert loaded.manifest.id == "auth-code"
     assert loaded.manifest.capabilities == ("action", "http_server")
     assert loaded.stop is stop
 

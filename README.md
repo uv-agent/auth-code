@@ -12,7 +12,7 @@ and consumed after one successful verification.
 ```json
 {
   "plugins": {
-    "auth_code": {
+    "auth-code": {
       "enabled": true,
       "config": {
         "token": "replace-with-a-long-random-token",
@@ -38,6 +38,9 @@ After token login, the plugin stores an in-memory HttpOnly session cookie.
 ```python
 result = await context.actions.call("auth_code.verify", {"code": "A7K2Q9"})
 ```
+
+The plugin id is `auth-code`. The action id remains `auth_code.verify` because
+uv-agent action ids use dotted Python-style names.
 
 Successful verification returns:
 

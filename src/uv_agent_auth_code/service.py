@@ -37,7 +37,7 @@ class AuthCodeConfig:
         data = dict(value or {})
         token = str(data.get("token") or "").strip()
         if not token:
-            raise ValueError("auth_code config requires a non-empty token")
+            raise ValueError("auth-code config requires a non-empty token")
         host = str(data.get("host") or "0.0.0.0").strip() or "0.0.0.0"
         port = _int_range(data.get("port", 8765), "port", minimum=0, maximum=65535)
         ttl_s = _int_range(data.get("ttl_s", 120), "ttl_s", minimum=1, maximum=86400)
@@ -459,7 +459,7 @@ def _int_range(value: Any, label: str, *, minimum: int, maximum: int) -> int:
     try:
         result = int(value)
     except (TypeError, ValueError) as exc:
-        raise ValueError(f"auth_code config {label} must be an integer") from exc
+        raise ValueError(f"auth-code config {label} must be an integer") from exc
     if result < minimum or result > maximum:
-        raise ValueError(f"auth_code config {label} must be between {minimum} and {maximum}")
+        raise ValueError(f"auth-code config {label} must be between {minimum} and {maximum}")
     return result

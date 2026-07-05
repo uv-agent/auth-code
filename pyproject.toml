@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.entry-points."uv_agent.plugins"]
-auth_code = "uv_agent_auth_code:plugin"
+auth-code = "uv_agent_auth_code:plugin"
 
 [dependency-groups]
 dev = [

@@ -7,7 +7,7 @@ from uv_agent.plugins import PluginManifest, SetupPlugin
 from .service import AuthCodeConfig, AuthCodeService
 
 MANIFEST = PluginManifest(
-    id="auth_code",
+    id="auth-code",
     version="0.1.0",
     display_name={"en": "Auth Code", "zh": "验证码鉴权"},
     description={
