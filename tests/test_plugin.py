@@ -9,9 +9,9 @@ from urllib.error import HTTPError
 from urllib.request import HTTPCookieProcessor, Request, build_opener
 
 import pytest
-from uv_agent.plugins import SetupPlugin
+from uv_agent.plugins import CommandResult, SetupPlugin, TranscriptAction
 
-from uv_agent_auth_code import MANIFEST, _SERVICES, plugin, setup, stop
+from uv_agent_auth_code import MANIFEST, _SERVICES, _config_for_host, plugin, setup, stop
 import uv_agent_auth_code.service as service_module
 from uv_agent_auth_code.service import AuthCodeConfig, AuthCodeService, ChallengeStore, generate_code
 
@@ -25,11 +25,34 @@ class ActionRecorder:
         return self.registered[action_id]
 
 
-def make_context(**config):
+class CommandRecorder:
+    def __init__(self) -> None:
+        self.registered: dict[str, dict[str, object]] = {}
+
+    def register(self, name: str, handler, *, description="", aliases=()):
+        self.registered[name] = {
+            "handler": handler,
+            "description": description,
+            "aliases": tuple(aliases),
+        }
+        return self.registered[name]
+
+
+def host_info(*, invocation: str = "daemon", lifetime: str = "persistent") -> SimpleNamespace:
+    return SimpleNamespace(
+        invocation=invocation,
+        lifetime=lifetime,
+        is_persistent=lifetime == "persistent",
+    )
+
+
+def make_context(*, plugin_host=None, **config):
     return SimpleNamespace(
         config=config,
+        host=plugin_host or host_info(),
         logger=logging.getLogger("test.auth-code"),
         actions=ActionRecorder(),
+        commands=CommandRecorder(),
     )
 
 
@@ -39,7 +62,8 @@ def test_plugin_entrypoint_manifest() -> None:
     assert isinstance(loaded, SetupPlugin)
     assert loaded.manifest is MANIFEST
     assert loaded.manifest.id == "auth-code"
-    assert loaded.manifest.capabilities == ("action", "http_server")
+    assert loaded.manifest.capabilities == ("action", "command", "http_server")
+    assert loaded.manifest.activation == "always"
     assert loaded.stop is stop
 
 
@@ -51,6 +75,47 @@ def test_setup_requires_token() -> None:
 
     assert id(context) not in _SERVICES
     assert context.actions.registered == {}
+    assert context.commands.registered == {}
+
+
+def test_session_host_uses_ephemeral_port_without_changing_bind_host() -> None:
+    config = AuthCodeConfig(token="test-token", host="0.0.0.0", port=8765)
+
+    result = _config_for_host(config, host_info(invocation="tui", lifetime="session"))
+
+    assert result.host == "0.0.0.0"
+    assert result.port == 0
+
+
+def test_persistent_host_uses_configured_port() -> None:
+    config = AuthCodeConfig(token="test-token", host="0.0.0.0", port=8765)
+
+    result = _config_for_host(config, host_info(invocation="daemon", lifetime="persistent"))
+
+    assert result is config
+
+
+def test_setup_session_host_uses_os_assigned_port_and_reports_mode() -> None:
+    context = make_context(
+        plugin_host=host_info(invocation="tui", lifetime="session"),
+        token="test-token",
+        host="127.0.0.1",
+        port=1,
+    )
+    setup(context)
+    try:
+        service = _SERVICES[id(context)]
+        assert service.config.port == 0
+        assert service.port > 0
+
+        command = context.commands.registered["/auth-code"]["handler"]
+        status = command({"arg": ""}, context=context)
+
+        assert status.actions[0].kind == "event"
+        assert "mode: tui/session" in status.actions[0].text
+        assert f"bind: 127.0.0.1:{service.port}" in status.actions[0].text
+    finally:
+        stop(context)
 
 
 def test_generate_code_is_six_alphanumeric_chars_with_letter_and_digit() -> None:
@@ -97,6 +162,7 @@ def test_http_page_requires_token_then_serves_challenge_and_verify_action() -> N
         assert isinstance(service, AuthCodeService)
         assert service.url.startswith("http://127.0.0.1:")
         assert "auth_code.verify" in context.actions.registered
+        assert "/auth-code" in context.commands.registered
 
         with pytest.raises(HTTPError) as unauthorized:
             opener.open(service.url + "/", timeout=3)
@@ -121,6 +187,17 @@ def test_http_page_requires_token_then_serves_challenge_and_verify_action() -> N
         assert second["ok"] is False
         assert second["verified"] is False
         assert second["reason"] == "invalid"
+
+        command = context.commands.registered["/auth-code"]["handler"]
+        status = command({"arg": ""}, context=context)
+
+        assert isinstance(status, CommandResult)
+        assert status.actions
+        assert isinstance(status.actions[0], TranscriptAction)
+        assert status.actions[0].kind == "event"
+        assert "auth-code server" in status.actions[0].text
+        assert f"bind: 127.0.0.1:{service.port}" in status.actions[0].text
+        assert f"url: {service.url}" in status.actions[0].text
     finally:
         stop(context)
 

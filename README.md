@@ -33,6 +33,10 @@ http://127.0.0.1:8765/?token=replace-with-a-long-random-token
 
 After token login, the plugin stores an in-memory HttpOnly session cookie.
 
+In a persistent daemon host, `port` is used as configured. In a TUI/session host,
+the plugin keeps the configured `host` binding but asks the OS for an ephemeral
+port. Run `/auth-code` in the TUI to show the actual bind address and local URL.
+
 ## Action
 
 ```python
