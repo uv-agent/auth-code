@@ -1,6 +1,6 @@
 [project]
 name = "uv-agent-auth-code"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local auth-code challenge plugin for uv-agent."
 readme = "README.md"
 requires-python = ">=3.12"
