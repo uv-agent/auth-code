@@ -40,6 +40,7 @@ def plugin() -> SetupPlugin:
 def setup(context) -> None:
     config = AuthCodeConfig.from_mapping(context.config)
     config = _config_for_host(config, context.host)
+    # TODO: Share challenge state across daemon and TUI/session processes.
     service = AuthCodeService(config, logger=context.logger)
     service.start()
     _SERVICES[id(context)] = service
