@@ -5,7 +5,7 @@ description = "Local auth-code challenge plugin for uv-agent."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "uv-agent",
+    "uv-agent>=0.21.0",
 ]
 
 [project.entry-points."uv_agent.plugins"]
@@ -15,9 +15,6 @@ auth_code = "uv_agent_auth_code:plugin"
 dev = [
     "pytest>=9.0.0",
 ]
-
-[tool.uv.sources]
-uv-agent = { path = "../../uv-agent", editable = true }
 
 [build-system]
 requires = ["hatchling"]

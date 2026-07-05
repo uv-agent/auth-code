@@ -989,7 +989,7 @@ wheels = [
 [[package]]
 name = "uv-agent"
 version = "0.21.0"
-source = { editable = "../../uv-agent" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anthropic" },
     { name = "fff-search" },
@@ -1004,27 +1004,9 @@ dependencies = [
     { name = "unidiff" },
     { name = "watchfiles" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "anthropic", specifier = ">=0.103.1" },
-    { name = "fff-search", specifier = ">=0.9.6" },
-    { name = "mcp", specifier = ">=1.27.1" },
-    { name = "openai", specifier = ">=2.36.0" },
-    { name = "pillow", specifier = ">=12.0.0" },
-    { name = "pygments", specifier = ">=2.20.0" },
-    { name = "rich", specifier = ">=14.0.0" },
-    { name = "tomlkit", specifier = ">=0.15.0" },
-    { name = "tree-sitter", specifier = ">=0.25.2" },
-    { name = "tree-sitter-language-pack", specifier = ">=1.8.1,<1.9" },
-    { name = "unidiff", specifier = ">=0.7.5" },
-    { name = "watchfiles", specifier = ">=1.1.1" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=9.0.0" },
-    { name = "pytest-asyncio", specifier = ">=1.3.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/9c/78/a4f0bfda348bca0e45147f96981ecfb3db45068848346f6babec2b6cb03f/uv_agent-0.21.0.tar.gz", hash = "sha256:2d62827d71bf190e5798e8fbc52e6ea26006af714c60edd39814c4b2ef5498c1", size = 1693102, upload-time = "2026-07-04T16:57:57.277Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/11/dd8f676875c86c9fe84c6b00a38babdec5e8e4d4f44f5991fa5079a50afc/uv_agent-0.21.0-py3-none-any.whl", hash = "sha256:f757c5fbe304face44954d1bf2d76bf67025159f97c4ba7e76868e7456b1e5df", size = 431656, upload-time = "2026-07-04T16:57:55.57Z" },
 ]
 
 [[package]]
@@ -1041,7 +1023,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "uv-agent", editable = "../../uv-agent" }]
+requires-dist = [{ name = "uv-agent", specifier = ">=0.21.0" }]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytest", specifier = ">=9.0.0" }]
